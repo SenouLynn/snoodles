@@ -69,7 +69,8 @@ You are implementing Task N.M: [task name]
 ## Rules
 - Implement exactly what the task specifies. Nothing more.
 - Write tests if the task includes them.
-- Run the verification command and confirm it passes.
+- Run the task's verification command (test suite) and confirm it passes.
+- Do NOT run typecheck, lint, or build commands (tsc, pyright, go vet, etc.) unless the task explicitly requires it — hooks handle these automatically after every edit.
 - Commit your work with the specified commit message.
 - **Bad work is worse than no work.** If you can't do it right, report BLOCKED — don't produce something wrong.
 - If anything is unclear or unexpected: STOP and report back. Don't guess.

@@ -26,9 +26,9 @@ Complete in order:
    - **Budget:** Exploration should take ≤15 tool uses. If you can't fill a dimension in that budget, mark it as an open question and move on.
    - **Output:** compressed findings table — refs not summaries
    - **Never re-read what an agent already verified.** If an Explore agent returned a finding with "Verified" confidence, trust it. Do not re-read those files to double-check.
-   - When launching Explore agents:
+   - When launching Explore agents, **dispatch in parallel** where scopes don't overlap (e.g., one agent for `src/auth/`, another for `src/api/`). Send all in a single message.
      - State which dimensions the agent should fill
-     - Set a scope boundary (e.g., "search src/ for queue-related patterns")
+     - Set a scope boundary (e.g., "search src/auth/ for patterns related to JWT")
      - Require output as a compressed findings table
    - Format:
      ```

@@ -136,16 +136,16 @@ echo "  Commands: $CMD_COUNT"
 echo "  Agents: $AGENT_COUNT"
 
 # Expected counts — update these as skills are ported
-if [ "$SKILL_COUNT" -eq 6 ]; then
-    pass "Skill count: $SKILL_COUNT (expected 6: entry, insights, derive-prompt, brainstorm, execute, verify)"
+if [ "$SKILL_COUNT" -eq 10 ]; then
+    pass "Skill count: $SKILL_COUNT (expected 10: entry, insights, derive-prompt, brainstorm, execute, parallel, verify, debug, tdd, finish)"
 else
-    fail "Skill count: $SKILL_COUNT (expected 6)"
+    fail "Skill count: $SKILL_COUNT (expected 10)"
 fi
 
-if [ "$CMD_COUNT" -eq 6 ]; then
-    pass "Command count: $CMD_COUNT (expected 6: brainstorm, derive-prompt, execute, insights, plan, verify)"
+if [ "$CMD_COUNT" -eq 10 ]; then
+    pass "Command count: $CMD_COUNT (expected 10: brainstorm, debug, derive-prompt, execute, finish, insights, parallel, plan, tdd, verify)"
 else
-    fail "Command count: $CMD_COUNT (expected 6)"
+    fail "Command count: $CMD_COUNT (expected 10)"
 fi
 
 if [ "$AGENT_COUNT" -eq 1 ]; then
@@ -180,7 +180,7 @@ echo ""
 echo "=== 8. Pipeline Continuity ==="
 
 # entry must reference all available skills
-for skill in derive-prompt brainstorm execute verify insights; do
+for skill in derive-prompt brainstorm execute parallel verify debug tdd finish insights; do
     if grep -q "snoodles:$skill" skills/entry/SKILL.md; then
         pass "entry routes to snoodles:$skill"
     else
@@ -221,6 +221,27 @@ if grep -qi "code-review" skills/execute/SKILL.md; then
     pass "execute references code review"
 else
     fail "execute missing code review reference"
+fi
+
+# execute must reference finish skill
+if grep -q "snoodles:finish" skills/execute/SKILL.md; then
+    pass "execute → finish (completion flow)"
+else
+    fail "execute missing finish reference"
+fi
+
+# debug must enforce root cause before fixes
+if grep -q "Root Cause" skills/debug/SKILL.md; then
+    pass "debug enforces root cause investigation"
+else
+    fail "debug missing root cause enforcement"
+fi
+
+# tdd must enforce test-before-code
+if grep -q "FAILING TEST FIRST" skills/tdd/SKILL.md; then
+    pass "tdd enforces test-first"
+else
+    fail "tdd missing test-first enforcement"
 fi
 
 echo ""
@@ -332,8 +353,11 @@ check_word_count "skills/insights/SKILL.md" "insights (session-injected)" 300
 
 # Other skills can be larger but still bounded
 check_word_count "skills/brainstorm/SKILL.md" "brainstorm" 900
-check_word_count "skills/execute/SKILL.md" "execute" 700
+check_word_count "skills/execute/SKILL.md" "execute" 1000
 check_word_count "skills/verify/SKILL.md" "verify" 300
+check_word_count "skills/debug/SKILL.md" "debug" 700
+check_word_count "skills/tdd/SKILL.md" "tdd" 700
+check_word_count "skills/finish/SKILL.md" "finish" 300
 
 echo ""
 

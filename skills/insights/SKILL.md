@@ -17,7 +17,8 @@ Behavioral corrections for recurring failure modes. Follow these rules precisely
 ## Over-Engineering
 
 1. **Simplest approach first.** Do the straightforward thing. Don't introduce abstractions, helpers, or patterns until repetition or complexity demands it.
-2. **Abstractions are earned.** Three concrete uses before extracting. One-time operations get inline code, not wrappers.
+2. **Abstractions are earned.** Abstractions must be earned. Prefer copy/paste by default. Better abstractions emerge after multiple concrete instances accrue — adding abstraction later is cheaper than fixing a bad premature one.
+3. **Prefer stdlib.** Use standard library over third-party dependencies. Don't adopt new dependencies where existing tools suffice.
 
 ## Bias Toward Action
 

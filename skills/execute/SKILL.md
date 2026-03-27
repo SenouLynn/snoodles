@@ -100,7 +100,7 @@ When done, report:
 
 1. **Merge worktrees.** Each completed agent returns a worktree path and branch. Merge each branch to the working branch.
 2. **Handle conflicts.** If two tasks modified adjacent code, resolve and verify.
-3. **Phase verification.** Run project-level checks (build, test suite). If failures, fix before proceeding.
+3. **Phase verification.** Run the test suite to verify integration. If failures, fix before proceeding.
 4. **Code review** (if between-phases mode). Dispatch the code-reviewer agent on the merged diff:
 
 ```
@@ -128,7 +128,7 @@ Agent:
 
 Regardless of validation mode:
 
-1. Run full project verification (build + tests)
+1. Run test suite
 2. **Spec compliance review** — dispatch a reviewer agent on the complete implementation against the original plan:
 
 ```

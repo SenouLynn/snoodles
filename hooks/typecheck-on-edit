@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+# PostToolUse hook: typecheck after Edit/Write on TypeScript projects
+# Zero tokens on success — only reports back on failure
+
+set -euo pipefail
+
+# Read hook input from stdin
+input=$(cat)
+
+# Extract the file path from the hook payload
+file_path=$(echo "$input" | jq -r '.tool_input.file_path // .tool_response.filePath // empty' 2>/dev/null)
+
+# Skip if no file path or not a TS/TSX file
+if [ -z "$file_path" ]; then
+    exit 0
+fi
+
+case "$file_path" in
+    *.ts|*.tsx) ;;
+    *) exit 0 ;;
+esac
+
+# Find the project root by walking up to find tsconfig.json
+find_tsconfig() {
+    local dir="$1"
+    while [ "$dir" != "/" ]; do
+        if [ -f "$dir/tsconfig.json" ]; then
+            echo "$dir"
+            return 0
+        fi
+        dir=$(dirname "$dir")
+    done
+    return 1
+}
+
+project_root=$(find_tsconfig "$(dirname "$file_path")") || exit 0
+
+# Run tsc --noEmit with incremental for speed
+# Suppress stdout (success output), capture stderr (errors)
+cd "$project_root"
+
+# Prefer npx/bunx/pnpm based on what lockfile exists
+if [ -f "bun.lockb" ] || [ -f "bun.lock" ]; then
+    tsc_cmd="bunx tsc"
+elif [ -f "pnpm-lock.yaml" ]; then
+    tsc_cmd="pnpm exec tsc"
+elif [ -f "package-lock.json" ] || [ -f "node_modules/.bin/tsc" ]; then
+    tsc_cmd="npx tsc"
+else
+    # No package manager lockfile, try global tsc
+    tsc_cmd="tsc"
+fi
+
+# Run typecheck — capture output, suppress on success
+output=$($tsc_cmd --noEmit --pretty 2>&1) && exit 0
+
+# Failed — report first 20 lines of errors back to Claude
+errors=$(echo "$output" | head -20)
+error_count=$(echo "$output" | grep -c "error TS" || echo "0")
+
+# Escape for JSON
+escaped_errors=$(echo "$errors" | jq -Rs '.')
+
+cat <<EOF
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PostToolUse",
+    "additionalContext": "TypeScript typecheck failed after editing ${file_path}:\n${error_count} error(s) found.\n\n${errors}"
+  }
+}
+EOF
+
+exit 0

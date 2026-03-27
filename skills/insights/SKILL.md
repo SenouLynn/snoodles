@@ -34,3 +34,4 @@ Behavioral corrections for recurring failure modes. Follow these rules precisely
 ## Verify Edits Immediately
 
 1. **Use available tooling.** After edits, check LSP diagnostics, local linters, and formatters already configured in the project. Don't wait until the end to discover errors introduced mid-session.
+2. **Hooks handle build validation.** PostToolUse hooks run typecheck/lint automatically after edits. Don't run typecheck, lint, or build commands manually — the hooks report failures automatically. Only run test suites explicitly.

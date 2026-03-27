@@ -26,6 +26,10 @@ When the user enters plan mode with a task description, you MUST invoke `snoodle
 | `snoodles:derive-prompt` | Writing, fixing, or improving a prompt for any AI tool |
 | `snoodles:brainstorm` | Exploring requirements, design, and producing a phased plan doc |
 | `snoodles:execute` | Executing a phased plan with parallel agents in worktrees |
+| `snoodles:parallel` | 2+ independent problems — ad-hoc parallel dispatch, not plan execution |
+| `snoodles:debug` | Any bug, test failure, or unexpected behavior — before proposing fixes |
+| `snoodles:tdd` | Implementing any feature or bugfix — before writing implementation code |
+| `snoodles:finish` | Implementation complete, tests pass — merge, PR, keep, or discard |
 | `snoodles:verify` | Before claiming work is complete — evidence before assertions |
 | `snoodles:insights` | Reviewing or updating the behavioral rules mid-session |
 

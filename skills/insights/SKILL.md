@@ -21,7 +21,15 @@ Behavioral corrections for recurring failure modes. Follow these rules precisely
 
 ## Bias Toward Action
 
-1. **Execute, don't deliberate.** When asked to implement, start editing. Don't re-read files already in context or plan unless explicitly asked.
+1. **Execute, don't deliberate.** When asked to implement, start editing. Don't re-read files already in context or plan unless explicitly asked or file has changed since last known state.
+2. **Trust verified findings.** If an agent returned a finding with "Verified" confidence, do not re-read those files to double-check. Re-reading what's already known is the most common time sink.
+3. **Ask before thrashing.** If you can't locate a pattern, file, or entry point within 5 tool uses, stop and ask the user for a path. They know the codebase better than you.
+
+## Receiving Feedback
+
+1. **Verify before implementing.** When receiving review feedback or suggestions, check against the codebase before acting. Reviewer may lack context or be wrong.
+2. **Push back with reasoning.** If feedback is technically incorrect, say so with evidence. Technical correctness over social comfort.
+3. **No performative agreement.** Never say "great point", "you're absolutely right", or express gratitude before verifying. Restate the technical requirement or just start working.
 
 ## Verify Edits Immediately
 

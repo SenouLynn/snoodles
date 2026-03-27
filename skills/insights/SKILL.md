@@ -1,7 +1,6 @@
 ---
 name: insights
 description: Session-injected behavioral rules to correct common Claude failure modes. Loaded automatically on every session start.
-version: 1.0.0
 ---
 
 # Insights

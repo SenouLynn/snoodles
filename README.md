@@ -1,11 +1,9 @@
 # Snoodles
 
-Personal Claude Code plugin. Successor to [snood](https://github.com/senoulynn/snood).
-`/snoodles:plan <task>` runs the full pipeline: intent extraction → exploration + phased plan → parallel agent execution in worktrees. Each stage hands off to the next. You approve the plan and the final result.
+Derive intent, brainstorm, create plan, execute. 
 
-Individual skills work standalone: `/snoodles:debug` for root-cause-first debugging, `/snoodles:tdd` for test-first development, `/snoodles:parallel` for ad-hoc concurrent dispatch.
-
-Every session gets behavioral rules injected automatically (epistemic honesty, anti-overengineering, anti-sycophancy). Language-specific typechecking runs after every edit via hooks (zero token cost) reporting only failures. 
+**Intended Flow**: `/snoodles:plan <task>` runs the full pipeline: 
+```intent extraction → exploration + phased plan → parallel agent execution in worktrees.```
 
 See [docs/overview.md](docs/overview.md) for detailed usage. See [docs/flows.md](docs/flows.md) for execution flow diagrams.
 
@@ -54,7 +52,7 @@ PostToolUse hooks run language-specific validation after every Edit/Write. Zero 
 |-------|--------|---------|
 | `entry` | Session start (injected) | Routing table, planning flow, HARD-GATE |
 | `insights` | Session start (injected) | Behavioral correction rules |
-| `derive-prompt` | On demand | Intent extraction, prompt optimization for any AI tool |
+| `derive-prompt` | On demand | Intent extraction, prompt optimization (for any AI tool) |
 | `brainstorm` | On demand | Exploration → design → phased plan doc |
 | `execute` | On demand | Parallel agents per phase, worktree isolation, spec + code review |
 | `parallel` | On demand | Ad-hoc parallel dispatch for independent problems |

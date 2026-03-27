@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+# PostToolUse hook: typecheck after Edit/Write on Python projects
+# Zero tokens on success — only reports back on failure
+
+set -euo pipefail
+
+input=$(cat)
+
+file_path=$(echo "$input" | jq -r '.tool_input.file_path // .tool_response.filePath // empty' 2>/dev/null)
+
+# Skip if no file path or not a Python file
+if [ -z "$file_path" ]; then
+    exit 0
+fi
+
+case "$file_path" in
+    *.py) ;;
+    *) exit 0 ;;
+esac
+
+# Find project root by walking up to find pyproject.toml, setup.py, or mypy.ini
+find_python_root() {
+    local dir="$1"
+    while [ "$dir" != "/" ]; do
+        if [ -f "$dir/pyproject.toml" ] || [ -f "$dir/setup.py" ] || [ -f "$dir/mypy.ini" ] || [ -f "$dir/pyrightconfig.json" ]; then
+            echo "$dir"
+            return 0
+        fi
+        dir=$(dirname "$dir")
+    done
+    return 1
+}
+
+project_root=$(find_python_root "$(dirname "$file_path")") || exit 0
+cd "$project_root"
+
+# Prefer pyright (faster) over mypy, skip if neither available
+if [ -f "pyrightconfig.json" ] && command -v pyright &>/dev/null; then
+    check_cmd="pyright"
+elif command -v pyright &>/dev/null; then
+    check_cmd="pyright"
+elif command -v mypy &>/dev/null; then
+    check_cmd="mypy"
+else
+    exit 0
+fi
+
+# Run typecheck on just the changed file
+output=$($check_cmd "$file_path" 2>&1) && exit 0
+
+# Failed — report first 20 lines
+errors=$(echo "$output" | head -20)
+error_count=$(echo "$output" | grep -c "error:" || echo "0")
+
+cat <<EOF
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PostToolUse",
+    "additionalContext": "Python typecheck failed after editing ${file_path}:\n${error_count} error(s) found.\n\n${errors}"
+  }
+}
+EOF
+
+exit 0

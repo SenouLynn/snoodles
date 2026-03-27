@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+# PostToolUse hook: go vet after Edit/Write on Go projects
+# Zero tokens on success — only reports back on failure
+
+set -euo pipefail
+
+input=$(cat)
+
+file_path=$(echo "$input" | jq -r '.tool_input.file_path // .tool_response.filePath // empty' 2>/dev/null)
+
+# Skip if no file path or not a Go file
+if [ -z "$file_path" ]; then
+    exit 0
+fi
+
+case "$file_path" in
+    *.go) ;;
+    *) exit 0 ;;
+esac
+
+# Find project root by walking up to find go.mod
+find_go_root() {
+    local dir="$1"
+    while [ "$dir" != "/" ]; do
+        if [ -f "$dir/go.mod" ]; then
+            echo "$dir"
+            return 0
+        fi
+        dir=$(dirname "$dir")
+    done
+    return 1
+}
+
+project_root=$(find_go_root "$(dirname "$file_path")") || exit 0
+cd "$project_root"
+
+# Ensure go is available
+command -v go &>/dev/null || exit 0
+
+# Get the package path for the edited file
+pkg_dir=$(dirname "$file_path")
+rel_pkg="./${pkg_dir#$project_root/}"
+
+# Run go vet on the package containing the edited file
+output=$(go vet "$rel_pkg" 2>&1) && exit 0
+
+# Failed — report
+errors=$(echo "$output" | head -20)
+
+cat <<EOF
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PostToolUse",
+    "additionalContext": "go vet failed after editing ${file_path}:\n\n${errors}"
+  }
+}
+EOF
+
+exit 0

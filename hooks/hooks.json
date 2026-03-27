@@ -20,6 +20,16 @@
             "type": "command",
             "command": "bash '${CLAUDE_PLUGIN_ROOT}/hooks/typecheck-on-edit'",
             "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "bash '${CLAUDE_PLUGIN_ROOT}/hooks/pycheck-on-edit'",
+            "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "bash '${CLAUDE_PLUGIN_ROOT}/hooks/govet-on-edit'",
+            "timeout": 30
           }
         ]
       }

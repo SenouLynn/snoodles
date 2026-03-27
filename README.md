@@ -36,12 +36,9 @@ PostToolUse hooks run language-specific validation after every Edit/Write. Zero 
 | Command | Purpose |
 |---------|---------|
 | `/snoodles:plan <task>` | Full pipeline: derive-prompt → brainstorm → execute |
-| `/snoodles:derive-prompt` | Write, fix, or improve prompts for any AI tool |
-| `/snoodles:brainstorm` | Explore requirements, design, produce phased plan doc |
-| `/snoodles:execute` | Execute phased plan with parallel agents in worktrees |
-| `/snoodles:parallel` | Ad-hoc parallel dispatch for independent problems |
 | `/snoodles:debug` | Systematic debugging — root cause before fixes |
 | `/snoodles:tdd` | Test-driven development — red-green-refactor |
+| `/snoodles:parallel` | Ad-hoc parallel dispatch for independent problems |
 | `/snoodles:finish` | Complete a branch — merge, PR, keep, or discard |
 | `/snoodles:verify` | Evidence before completion claims |
 | `/snoodles:insights` | Review or update behavioral rules mid-session |

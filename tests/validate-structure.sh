@@ -142,10 +142,10 @@ else
     fail "Skill count: $SKILL_COUNT (expected 10)"
 fi
 
-if [ "$CMD_COUNT" -eq 10 ]; then
-    pass "Command count: $CMD_COUNT (expected 10: brainstorm, debug, derive-prompt, execute, finish, insights, parallel, plan, tdd, verify)"
+if [ "$CMD_COUNT" -eq 7 ]; then
+    pass "Command count: $CMD_COUNT (expected 7: debug, finish, insights, parallel, plan, tdd, verify)"
 else
-    fail "Command count: $CMD_COUNT (expected 10)"
+    fail "Command count: $CMD_COUNT (expected 7)"
 fi
 
 if [ "$AGENT_COUNT" -eq 1 ]; then

@@ -2,8 +2,15 @@
 
 Derive intent, brainstorm, create plan, execute. 
 
-**Intended Flow**: `/snoodles:plan <task>` runs the full pipeline: 
-```intent extraction → exploration + phased plan → parallel agent execution in worktrees.```
+## Core Heuristics
+- Minimize corrective loops; sacrifice *some* time to extract intent and decompose tasks for better initial results. 
+- Scope & re-use core context building artefacts.  
+- User owns git history. Nothing auto-commits onto user branches.
+
+**Intended Flow**: 
+```bash
+/snoodles:plan <task> # runs the full pipeline: intent extraction → exploration + phased plan → parallel agent execution in worktrees.
+```
 
 See [docs/overview.md](docs/overview.md) for detailed usage. See [docs/flows.md](docs/flows.md) for execution flow diagrams.
 

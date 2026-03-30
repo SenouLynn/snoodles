@@ -8,9 +8,18 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
 PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
-# Read both files
+# Read skill files
 entry_content=$(cat "${PLUGIN_ROOT}/skills/entry/SKILL.md" 2>&1 || echo "Error reading entry skill")
 insights_content=$(cat "${PLUGIN_ROOT}/skills/insights/SKILL.md" 2>&1 || echo "Error reading insights skill")
+
+# Read vault config (config.local.json overrides config.json)
+vault_path=""
+if [[ -f "${PLUGIN_ROOT}/config.local.json" ]]; then
+    vault_path=$(python3 -c "import json,sys; print(json.load(open(sys.argv[1]))['vault_path'])" "${PLUGIN_ROOT}/config.local.json" 2>/dev/null || true)
+fi
+if [[ -z "$vault_path" && -f "${PLUGIN_ROOT}/config.json" ]]; then
+    vault_path=$(python3 -c "import json,sys; print(json.load(open(sys.argv[1]))['vault_path'])" "${PLUGIN_ROOT}/config.json" 2>/dev/null || true)
+fi
 
 # Escape string for JSON embedding using bash parameter substitution.
 escape_for_json() {
@@ -25,7 +34,15 @@ escape_for_json() {
 
 entry_escaped=$(escape_for_json "$entry_content")
 insights_escaped=$(escape_for_json "$insights_content")
-session_context="<EXTREMELY_IMPORTANT>\nYou have snoodles.\n\n${entry_escaped}\n\n---\n\n${insights_escaped}\n</EXTREMELY_IMPORTANT>"
+
+# Build vault context line if vault path was resolved
+vault_context=""
+if [[ -n "$vault_path" ]]; then
+    vault_path_escaped=$(escape_for_json "$vault_path")
+    vault_context="\\n---\\nObsidian vault path: ${vault_path_escaped}\\n"
+fi
+
+session_context="<EXTREMELY_IMPORTANT>\nYou have snoodles.\n\n${entry_escaped}\n\n---\n\n${insights_escaped}${vault_context}\n</EXTREMELY_IMPORTANT>"
 
 # Output context injection as JSON.
 # Keep both shapes for compatibility:

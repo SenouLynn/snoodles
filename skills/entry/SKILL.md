@@ -32,6 +32,7 @@ When the user enters plan mode with a task description, you MUST invoke `snoodle
 | `snoodles:finish` | Implementation complete, tests pass — merge, PR, keep, or discard |
 | `snoodles:verify` | Before claiming work is complete — evidence before assertions |
 | `snoodles:insights` | Reviewing or updating the behavioral rules mid-session |
+| `snoodles:create-skill` | Creating a new skill or editing an existing skill |
 
 ### Planning Flow
 

@@ -49,6 +49,21 @@ BUTTON[create-task]
 
 ---
 
+## Retroactive Task Logging
+
+When the user wants to log a task they already completed but forgot to track, insert it as already done:
+
+```
+- [x] JIRA:MF-[NUMBER] [start:: YYYY-MM-DD] [due:: YYYY-MM-DD] [completion:: YYYY-MM-DD]
+```
+
+- Mark `[x]` immediately — the task is already finished
+- Include `[start::]`, `[due::]`, and `[completion::]` so the work is properly tabulated
+- The user will provide all dates (start, due, completed) since this is historical
+- Same insertion point rules apply — insert after the `## Todo` / `---` delimiter
+
+---
+
 ## Event Tasks (Personal / Non-Project)
 
 Target file: the events file from config (default `Planner/Events.md`).

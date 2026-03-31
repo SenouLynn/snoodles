@@ -23,8 +23,8 @@ Dispatch parallel agents to execute a phased plan. Each agent works in an isolat
 For each phase:
   1. Dispatch all tasks in parallel (one agent per task, isolation: "worktree")
   2. Collect results — all must complete before proceeding
-  3. Merge worktree branches to working branch
-  4. Resolve any merge conflicts
+  3. Apply worktree changes to working branch (uncommitted — never auto-commit)
+  4. Resolve any conflicts
   5. Run phase verification (project builds, tests pass)
   6. [If between-phases mode] Dispatch code review on merged phase result
   7. [If issues found] Fix before starting next phase
@@ -99,7 +99,7 @@ When done, report:
 
 ## After Each Phase
 
-1. **Merge worktrees.** Each completed agent returns a worktree path and branch. Merge each branch to the working branch.
+1. **Apply worktree changes.** Each completed agent returns a worktree path and branch. Apply changes to working branch as uncommitted/staged files — NEVER auto-commit onto the working branch. Use `git diff <worktree-branch> | git apply` or `git cherry-pick --no-commit`.
 2. **Handle conflicts.** If two tasks modified adjacent code, resolve and verify.
 3. **Phase verification.** Run the test suite to verify integration. If failures, fix before proceeding.
 4. **Code review** (if between-phases mode). Dispatch the code-reviewer agent on the merged diff:
@@ -165,7 +165,7 @@ Agent:
 
 **Agent reports NEEDS_CONTEXT:** Answer the question, re-dispatch.
 
-**Merge conflict:** Resolve manually, verify, continue.
+**Apply conflict:** Resolve manually, verify, continue.
 
 **Phase verification fails:** Identify which task broke it, fix, re-verify.
 
@@ -174,9 +174,9 @@ Agent:
 ## Red Flags
 
 - NEVER start on main/master without explicit user consent — create a branch first
-- NEVER dispatch Phase N+1 before Phase N is fully merged and verified
+- NEVER dispatch Phase N+1 before Phase N is fully applied and verified
 - NEVER skip phase verification (build + tests must pass)
 - NEVER send an agent the raw plan file — paste the task text
 - NEVER proceed with Critical review issues unresolved
-- **Commit philosophy:** worktree → commit freely; user branch → stage only, prompt user
+- **Commit philosophy:** worktree → commit freely; working branch → NEVER auto-commit. All worktree results land as uncommitted/staged changes. User commits when ready.
 - If end-only mode: still run build+tests between phases — just skip code review

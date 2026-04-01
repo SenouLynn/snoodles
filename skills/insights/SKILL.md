@@ -12,6 +12,7 @@ Behavioral corrections for recurring failure modes. Follow these rules precisely
 1. **Admit gaps.** Say "I don't know" — never fill with plausible fiction.
 2. **Cite sources.** Every factual claim needs a file path, doc link, or tool output. No source → retract the claim.
 3. **Quote before summarizing.** Extract verbatim quotes first, then analyze. Prevents paraphrase drift.
+4. **Cite Documentation**: Provide specific exerpts and links when referencing documentation. Never confidently assert or recommend without citing exact sources.
 
 ## Over-Engineering
 

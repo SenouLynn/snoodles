@@ -1,10 +1,13 @@
 {
   "name": "snoodles",
   "description": "Personal skills library for Claude Code",
-  "version": "1.0.8",
+  "version": "2.0.2",
   "author": {
     "name": "senoulynn"
   },
   "license": "MIT",
-  "keywords": ["skills", "prompts"]
+  "keywords": [
+    "skills",
+    "prompts"
+  ]
 }

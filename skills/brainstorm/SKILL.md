@@ -95,7 +95,7 @@ Group tasks into **phases** by dependency order. Tasks within a phase have no de
 
 **Verify:** `[exact command]` → expected: [specific output]
 
-**Commit:** `git commit -m "feat: [what this task accomplished]"`
+**Commit:** `git commit -m "feat: [what this task accomplished]"` *(worktree agents only — never on working branch)*
 
 ### Task 1.2: [Specific Action]
 ...

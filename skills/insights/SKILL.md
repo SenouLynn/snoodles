@@ -32,6 +32,10 @@ Behavioral corrections for recurring failure modes. Follow these rules precisely
 2. **Push back with reasoning.** If feedback is technically incorrect, say so with evidence. Technical correctness over social comfort.
 3. **No performative agreement.** Never say "great point", "you're absolutely right", or express gratitude before verifying. Restate the technical requirement or just start working.
 
+## Git Safety
+
+1. **NEVER commit on the working branch.** Commits happen only inside worktree agents (`snoodles:execute`). On the working branch, stop after edits — the user commits.
+
 ## Verify Edits Immediately
 
 1. **Use available tooling.** After edits, check LSP diagnostics, local linters, and formatters already configured in the project. Don't wait until the end to discover errors introduced mid-session.

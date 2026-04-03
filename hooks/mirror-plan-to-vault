@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# PostToolUse hook: mirror plan files to Obsidian vault
+# Fires on every Write/Edit; exits silently unless the file is in ~/.claude/plans/
+
+set -euo pipefail
+
+VAULT_PLANS_DIR="/Users/senoulynn/Desktop/ODIJ Docs - Work/Claude/Plans"
+
+input=$(cat)
+file_path=$(echo "$input" | jq -r '.tool_input.file_path // empty' 2>/dev/null)
+
+[ -z "$file_path" ] && exit 0
+
+# Expand ~ to $HOME if present
+file_path="${file_path/#\~/$HOME}"
+
+# Only act on plan files
+case "$file_path" in
+    "$HOME/.claude/plans/"*.md) ;;
+    *) exit 0 ;;
+esac
+
+mkdir -p "$VAULT_PLANS_DIR"
+cp "$file_path" "$VAULT_PLANS_DIR/"
+
+exit 0

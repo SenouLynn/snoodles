@@ -1,0 +1,12 @@
+{
+  "vault_path": "/path/to/your/obsidian/vault",
+  "projects_dir": "Projects",
+  "daily_notes_dir": "Planner/Daily",
+  "daily_notes_format": "YYYY-MM-DD (Daily)",
+  "weekly_notes_dir": "Planner/Weekly",
+  "weekly_notes_format": "YYYY-MM-W[NUM] (Weekly)",
+  "events_file": "Planner/Events.md",
+  "quick_capture_file": "Planner/QuickCapture.md",
+  "mcp_server_name": "your-mcp-server-name",
+  "mcp_url": "http://127.0.0.1:7777/mcp"
+}

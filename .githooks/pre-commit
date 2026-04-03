@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# Pre-commit hook: bump patch version in plugin.json and marketplace.json
+
+set -euo pipefail
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+PLUGIN_JSON="${REPO_ROOT}/.claude-plugin/plugin.json"
+MARKETPLACE_JSON="${REPO_ROOT}/.claude-plugin/marketplace.json"
+
+# Extract current version from plugin.json
+current_version=$(python3 -c "
+import json, sys
+with open(sys.argv[1]) as f:
+    print(json.load(f)['version'])
+" "$PLUGIN_JSON")
+
+# Bump patch: 2.0.1 -> 2.0.2
+IFS='.' read -r major minor patch <<< "$current_version"
+new_version="${major}.${minor}.$((patch + 1))"
+
+# Update both files in-place
+python3 -c "
+import json, sys
+
+new_ver = sys.argv[1]
+
+# plugin.json
+with open(sys.argv[2]) as f:
+    plugin = json.load(f)
+plugin['version'] = new_ver
+with open(sys.argv[2], 'w') as f:
+    json.dump(plugin, f, indent=2)
+    f.write('\n')
+
+# marketplace.json
+with open(sys.argv[3]) as f:
+    market = json.load(f)
+for p in market.get('plugins', []):
+    p['version'] = new_ver
+with open(sys.argv[3], 'w') as f:
+    json.dump(market, f, indent=2)
+    f.write('\n')
+" "$new_version" "$PLUGIN_JSON" "$MARKETPLACE_JSON"
+
+git add "$PLUGIN_JSON" "$MARKETPLACE_JSON"
+
+echo "Bumped version: ${current_version} -> ${new_version}" >&2

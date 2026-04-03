@@ -161,3 +161,9 @@ Read only when the task requires it. Do not load both at once.
 | [references/tool-routing.md](references/tool-routing.md) | After identifying target tool — read only the matching section |
 | [references/templates.md](references/templates.md) | You need the full template structure for any tool category |
 | [references/patterns.md](references/patterns.md) | User pastes a bad prompt to fix, or you need the complete 35-pattern reference |
+
+## Pipeline Continuation
+
+If this skill was invoked as part of the planning flow (`/snoodles:plan`), do NOT stop after delivering the prompt. IMMEDIATELY invoke `snoodles:brainstorm` using the Skill tool, passing it the refined prompt. derive-prompt → brainstorm → execute. Step 1 is complete. Proceed to step 2 now.
+
+If invoked standalone, deliver the prompt and stop.

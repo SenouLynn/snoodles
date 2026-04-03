@@ -12,7 +12,7 @@ Derive intent, brainstorm, create plan, execute.
 /snoodles:plan <task> # runs the full pipeline: intent extraction → exploration + phased plan → parallel agent execution in worktrees.
 ```
 
-See [docs/overview.md](docs/overview.md) for detailed usage. See [docs/flows.md](docs/flows.md) for execution flow diagrams.
+See [docs/overview.md](docs/overview.md) for detailed usage. See [docs/flows.md](docs/flows.md) for execution flow diagrams. See [docs/obsidian-setup.md](docs/obsidian-setup.md) for Obsidian vault integration setup.
 
 ## Setup
 

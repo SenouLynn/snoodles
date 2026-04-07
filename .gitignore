@@ -4,3 +4,4 @@
 *~
 config.json
 config.local.json
+.claude/worktrees/

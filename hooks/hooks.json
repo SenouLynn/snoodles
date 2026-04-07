@@ -12,6 +12,28 @@
         ]
       }
     ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash '${CLAUDE_PLUGIN_ROOT}/hooks/commit-guard'",
+            "timeout": 3
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash '${CLAUDE_PLUGIN_ROOT}/hooks/skill-gate'",
+            "timeout": 3
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "Write|Edit",
@@ -35,6 +57,17 @@
             "type": "command",
             "command": "bash '${CLAUDE_PLUGIN_ROOT}/hooks/govet-on-edit'",
             "timeout": 30
+          }
+        ]
+      },
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash '${CLAUDE_PLUGIN_ROOT}/hooks/skill-canary'",
+            "timeout": 1,
+            "async": true
           }
         ]
       }

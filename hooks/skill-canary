@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+session_id=$(cat | jq -r '.session_id // empty')
+if [ -n "$session_id" ]; then
+  touch "/tmp/snoodles_skill_${session_id}"
+fi
+find /tmp -name 'snoodles_skill_*' -mmin +5 -delete 2>/dev/null
+exit 0

@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+# PreToolUse hook: block source code writes when no Skill was invoked this turn
+
+input=$(cat)
+transcript_path=$(printf '%s' "$input" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('transcript_path',''))" 2>/dev/null)
+file_path=$(printf '%s' "$input" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('tool_input',{}).get('file_path',''))" 2>/dev/null)
+session_id=$(printf '%s' "$input" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('session_id',''))" 2>/dev/null)
+
+# Source file gate — only check gated extensions or extensionless files in hooks/ dirs
+basename="${file_path##*/}"
+basename_noext="${basename%.*}"
+
+gated=0
+case "$file_path" in
+    *.ts|*.tsx|*.js|*.jsx|*.py|*.go|*.rs) gated=1 ;;
+esac
+
+# Extensionless files inside a hooks/ directory
+# A file is extensionless when stripping .* from basename leaves it unchanged
+if [ "$gated" -eq 0 ] && [ "$basename" = "$basename_noext" ]; then
+    case "$file_path" in
+        */hooks/*) gated=1 ;;
+    esac
+fi
+
+[ "$gated" -eq 0 ] && exit 0
+
+# Strategy A — transcript check
+if [ -n "$transcript_path" ] && [ -f "$transcript_path" ]; then
+    skill_found=$(tail -50 "$transcript_path" | python3 -c "
+import sys, json
+for line in reversed(sys.stdin.read().splitlines()):
+  try:
+    msg = json.loads(line)
+    if msg.get('role') == 'assistant':
+      for block in msg.get('content', []):
+        if block.get('type') == 'tool_use' and block.get('name') == 'Skill':
+          print('yes'); sys.exit(0)
+      print('no'); sys.exit(0)
+  except: pass
+print('no')
+" 2>/dev/null)
+    [ "$skill_found" = "yes" ] && exit 0
+fi
+
+# Strategy B — canary file fallback
+canary="/tmp/snoodles_skill_${session_id}"
+if [ -f "$canary" ]; then
+    age=$(( $(date +%s) - $(stat -f %m "$canary" 2>/dev/null || stat -c %Y "$canary") ))
+    [ "$age" -lt 300 ] && exit 0
+fi
+
+# Block with routing guidance
+printf '%s' '{"hookSpecificOutput":{"hookEventName":"PreToolUse","additionalContext":"SKILL GATE: Source code write blocked — no skill invoked this turn.\n\nFor features/bugfixes → snoodles:tdd\nFor debugging → snoodles:debug\nFor skill edits → snoodles:create-skill\nFor prompts → snoodles:derive-prompt\n\nInvoke the matching skill first, then retry."}}'
+exit 1

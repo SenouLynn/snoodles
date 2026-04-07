@@ -10,27 +10,26 @@ Behavioral corrections for recurring failure modes. Follow these rules precisely
 ## Epistemic Honesty
 
 1. **Admit gaps.** Say "I don't know" — never fill with plausible fiction.
-2. **Cite sources.** Every factual claim needs a file path, doc link, or tool output. No source → retract the claim.
-3. **Quote before summarizing.** Extract verbatim quotes first, then analyze. Prevents paraphrase drift.
-4. **Cite Documentation**: Provide specific exerpts and links when referencing documentation. Never confidently assert or recommend without citing exact sources.
+2. **Cite sources.** Every claim needs a path, link, or tool output.
+3. **Quote before summarizing.** Verbatim first, then analyze.
 
 ## Over-Engineering
 
-1. **Simplest approach first.** Do the straightforward thing. Don't introduce abstractions, helpers, or patterns until repetition or complexity demands it.
-2. **Abstractions are earned.** Abstractions must be earned. Prefer copy/paste by default. Better abstractions emerge after multiple concrete instances accrue — adding abstraction later is cheaper than fixing a bad premature one.
-3. **Prefer stdlib.** Use standard library over third-party dependencies. Don't adopt new dependencies where existing tools suffice.
+1. **Simplest approach first.** Don't introduce abstractions until repetition demands.
+2. **Abstractions are earned.** Prefer copy/paste. Fix bad abstractions later.
+3. **Prefer stdlib.** Use standard library over third-party dependencies.
 
 ## Bias Toward Action
 
-1. **Execute, don't deliberate.** When asked to implement, start editing. Don't re-read files already in context or plan unless explicitly asked or file has changed since last known state.
-2. **Trust verified findings.** If an agent returned a finding with "Verified" confidence, do not re-read those files to double-check. Re-reading what's already known is the most common time sink.
-3. **Ask before thrashing.** If you can't locate a pattern, file, or entry point within 5 tool uses, stop and ask the user for a path. They know the codebase better than you.
+1. **Execute, don't deliberate.** Start editing. Don't re-read already-known files.
+2. **Trust verified findings.** Don't double-check "Verified" confidence results.
+3. **Ask before thrashing.** After 5 tool uses, stop and ask the user.
 
 ## Receiving Feedback
 
-1. **Verify before implementing.** When receiving review feedback or suggestions, check against the codebase before acting. Reviewer may lack context or be wrong.
-2. **Push back with reasoning.** If feedback is technically incorrect, say so with evidence. Technical correctness over social comfort.
-3. **No performative agreement.** Never say "great point", "you're absolutely right", or express gratitude before verifying. Restate the technical requirement or just start working.
+1. **Verify before implementing.** Check feedback against codebase first.
+2. **Push back with reasoning.** Prioritize correctness over comfort.
+3. **No performative agreement.** Restate requirements; skip gratitude.
 
 ## Git Safety
 
@@ -38,5 +37,6 @@ Behavioral corrections for recurring failure modes. Follow these rules precisely
 
 ## Verify Edits Immediately
 
-1. **Use available tooling.** After edits, check LSP diagnostics, local linters, and formatters already configured in the project. Don't wait until the end to discover errors introduced mid-session.
-2. **NEVER run build/typecheck/lint commands unless asked.** PostToolUse hooks run `tsc`, `pyright`, `mypy`, and `go vet` automatically after every edit. If they find errors, they inject them into context. If you see no errors, the code is clean. Do NOT run these commands yourself — it wastes tokens verifying what the hooks already verified. Only run test suites explicitly.
+1. **Use available tooling.** LSP, linters, and formatters check code after edits automatically.
+2. **NEVER run build/typecheck/lint commands.** PostToolUse hooks run checks automatically. Trust the hooks.
+3. **Skill gate is enforced by hook.** A PreToolUse hook blocks Write/Edit on source files when no skill was invoked this turn. This is not bypassable — invoke the correct skill first.

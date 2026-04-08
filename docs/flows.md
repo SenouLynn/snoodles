@@ -24,10 +24,10 @@ flowchart TD
 ```mermaid
 flowchart TD
     subgraph phase[Per Phase]
-        dispatch[Parallel agents\nin worktrees] --> merge[Merge branches]
-        merge --> tests[Run tests]
-        tests -->|between-phases mode| review[Code review]
-        tests -->|end-only mode| next[Next phase]
+        dispatch[Parallel agents\nin worktrees] --> merge[git merge --squash\nper worktree branch]
+        merge --> hooks[Hook feedback\nclean?]
+        hooks -->|between-phases mode| review[Code review]
+        hooks -->|end-only mode| next[Next phase]
         review --> next
     end
 

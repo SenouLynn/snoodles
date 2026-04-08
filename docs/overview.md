@@ -31,7 +31,7 @@ Plans are organized into phases. Tasks within a phase are independent — they d
 
 When execute runs a phase, it dispatches one agent per task, all in a single message so they run concurrently. Each agent works in an isolated git worktree so they can't interfere with each other.
 
-After all agents in a phase complete, their worktree branches get merged to the working branch. Then the test suite runs. If you chose between-phases validation, a code review also runs. Only after everything passes does the next phase start.
+After all agents in a phase complete, their worktree branches get applied to the working branch via `git merge --squash` (staged, never committed). PostToolUse hook feedback is checked — type errors, lint, and static analysis run automatically after each edit. If you chose between-phases validation, a code review also runs. Only after everything passes does the next phase start.
 
 After the final phase, a spec compliance review checks the entire implementation against the original plan. Then a code quality review runs. Then you get four options: merge, create PR, keep the branch, or discard.
 
@@ -51,7 +51,7 @@ This means type errors get caught immediately after the edit that introduced the
 
 The hooks auto-detect the package manager for TypeScript projects (bun → pnpm → npm → global tsc) and prefer pyright over mypy for Python. None of this requires configuration — if the project has the right files, the hooks activate.
 
-**Important:** these hooks replace manual build/typecheck commands. The insights rule "hooks handle build validation" tells Claude not to run `tsc`, `pyright`, or `go vet` itself. Only test suites need to be run explicitly, because test output requires Claude to understand what failed and why.
+**Important:** these hooks replace all manual verification commands. The insights rule tells Claude not to run `tsc`, `pyright`, `go vet`, or test suites itself — hooks handle all of it automatically. Claude only pays attention when something breaks.
 
 ## The Behavioral Rules
 

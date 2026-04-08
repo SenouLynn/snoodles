@@ -9,8 +9,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
 PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 # Read skill files
-entry_content=$(cat "${PLUGIN_ROOT}/skills/entry/SKILL.md" 2>&1 || echo "Error reading entry skill")
-insights_content=$(cat "${PLUGIN_ROOT}/skills/insights/SKILL.md" 2>&1 || echo "Error reading insights skill")
+entry_content=$(cat "${PLUGIN_ROOT}/session/entry/SKILL.md" 2>&1 || echo "Error reading entry skill")
+insights_content=$(cat "${PLUGIN_ROOT}/session/insights/SKILL.md" 2>&1 || echo "Error reading insights skill")
 
 # Read vault config (config.local.json overrides config.json)
 vault_path=""

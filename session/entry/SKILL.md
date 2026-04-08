@@ -31,34 +31,11 @@ When the user enters plan mode with a task description, you MUST invoke `snoodle
 | `snoodles:tdd` | Implementing any feature or bugfix — before writing implementation code |
 | `snoodles:finish` | Implementation complete, tests pass — merge, PR, keep, or discard |
 | `snoodles:verify` | Before claiming work is complete — evidence before assertions |
-| `snoodles:insights` | Reviewing or updating the behavioral rules mid-session |
 | `snoodles:create-skill` | Creating a new skill or editing an existing skill |
-
-### Planning Flow
-
-When the user describes a task or goal in plan mode:
-
-1. **Invoke `snoodles:derive-prompt`** — condense the user's description into a refined, intent-extracted prompt optimized for Claude
-2. **Clarify if needed** — derive-prompt may ask up to 3 questions before producing the refined prompt. Let it.
-3. **Pass to `snoodles:brainstorm`** — hand the refined prompt to brainstorm for exploration, design, and phased plan doc
-4. **Invoke `snoodles:execute`** — once the user approves the plan, dispatch parallel agents per phase
-
-**Trigger:** `/snoodles:plan <task description>` — or invoke each step manually.
 
 ### Routing Rules
 
 1. **Skills before action.** Check for a matching skill before responding — including clarifying questions.
 2. **Process before implementation.** If multiple skills match, invoke process skills first.
 3. **User instructions say WHAT, not HOW.** "Add X" or "Fix Y" doesn't mean skip skill routing.
-4. **Plan mode triggers the planning flow.** If entering plan mode with a task description, start at step 1 above.
-
-### Red Flags
-
-These thoughts mean STOP — you're skipping routing:
-
-| Thought | Reality |
-|---------|---------|
-| "This is just a simple question" | Check for skills first. |
-| "Let me explore the codebase first" | Skills tell you HOW to explore. Check first. |
-| "The skill is overkill here" | If it exists and matches, use it. |
-| "I'll just do this one thing first" | Check BEFORE doing anything. |
+4. **Plan mode triggers the planning flow.** Use `/snoodles:plan <task>` or invoke `snoodles:derive-prompt` → `snoodles:brainstorm` → `snoodles:execute` manually.

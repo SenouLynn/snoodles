@@ -36,6 +36,25 @@ done
 
 echo ""
 
+# --- 1b. Session directory structure ---
+echo "=== 1b. Session Directory Structure ==="
+
+for name in entry insights; do
+    if [ -f "session/$name/SKILL.md" ]; then
+        pass "$name in session/ directory"
+    else
+        fail "$name missing from session/ directory"
+    fi
+    # Anti-duplication: must NOT be in skills/
+    if [ -d "skills/$name" ]; then
+        fail "$name still in skills/ (should be in session/ only)"
+    else
+        pass "$name not duplicated in skills/"
+    fi
+done
+
+echo ""
+
 # --- 2. Frontmatter validation ---
 echo "=== 2. Frontmatter Validation ==="
 
@@ -62,22 +81,42 @@ for skill_file in skills/*/SKILL.md; do
     fi
 done
 
+# Also validate session files
+for session_file in session/*/SKILL.md; do
+    [ -f "$session_file" ] || continue
+    session_name=$(basename "$(dirname "$session_file")")
+
+    if head -10 "$session_file" | grep -q "^name:"; then
+        pass "$session_name (session) has name in frontmatter"
+    else
+        fail "$session_name (session) missing name in frontmatter"
+    fi
+
+    if head -10 "$session_file" | grep -q "^description:"; then
+        pass "$session_name (session) has description in frontmatter"
+    else
+        fail "$session_name (session) missing description in frontmatter"
+    fi
+done
+
 echo ""
 
 # --- 3. Cross-reference validation ---
 echo "=== 3. Cross-Reference Validation ==="
 
-REFERENCED=$(grep -roh 'snoodles:[a-z-]*' skills/ commands/ 2>/dev/null | sed 's/snoodles://' | sort -u)
+REFERENCED=$({ grep -roh 'snoodles:[a-z-]*' skills/ session/ commands/ 2>/dev/null || true; } | sed 's/snoodles://' | sort -u)
 
 for ref in $REFERENCED; do
     if [ -d "skills/$ref" ]; then
         pass "snoodles:$ref → skills/$ref/ exists"
+    elif [ -d "session/$ref" ]; then
+        pass "snoodles:$ref → session/$ref/ exists (session-injected)"
     elif [ -f "commands/$ref.md" ]; then
         pass "snoodles:$ref → commands/$ref.md exists (command)"
     elif [ -f "agents/$ref.md" ]; then
         pass "snoodles:$ref → agents/$ref.md exists (agent)"
     else
-        fail "snoodles:$ref referenced but not found in skills/, commands/, or agents/"
+        fail "snoodles:$ref referenced but not found in skills/, session/, commands/, or agents/"
     fi
 done
 
@@ -137,7 +176,7 @@ echo "  Agents: $AGENT_COUNT"
 
 # Expected counts — update these as skills are ported
 if [ "$SKILL_COUNT" -eq 10 ]; then
-    pass "Skill count: $SKILL_COUNT (expected 10: entry, insights, derive-prompt, brainstorm, execute, parallel, verify, debug, tdd, finish)"
+    pass "Skill count: $SKILL_COUNT (expected 10: derive-prompt, brainstorm, execute, parallel, verify, debug, tdd, finish, create-skill, obsidian-cli)"
 else
     fail "Skill count: $SKILL_COUNT (expected 10)"
 fi
@@ -159,8 +198,8 @@ echo ""
 # --- 7. Enforcement language ---
 echo "=== 7. Enforcement Language ==="
 
-HARD_GATE=$(grep -r "HARD-GATE" --include="*.md" skills/ | wc -l | tr -d ' ')
-NEVER_COUNT=$(grep -r "NEVER" --include="*.md" skills/ | wc -l | tr -d ' ')
+HARD_GATE=$({ grep -r "HARD-GATE" --include="*.md" skills/ session/ 2>/dev/null || true; } | wc -l | tr -d ' ')
+NEVER_COUNT=$({ grep -r "NEVER" --include="*.md" skills/ session/ 2>/dev/null || true; } | wc -l | tr -d ' ')
 
 if [ "$HARD_GATE" -ge 1 ]; then
     pass "HARD-GATE blocks present ($HARD_GATE occurrences)"
@@ -179,20 +218,20 @@ echo ""
 # --- 8. Pipeline continuity ---
 echo "=== 8. Pipeline Continuity ==="
 
-# entry must reference all available skills
-for skill in derive-prompt brainstorm execute parallel verify debug tdd finish insights; do
-    if grep -q "snoodles:$skill" skills/entry/SKILL.md; then
+# entry must reference all available skills (except insights — session-injected, not routable)
+for skill in derive-prompt brainstorm execute parallel verify debug tdd finish; do
+    if grep -q "snoodles:$skill" session/entry/SKILL.md; then
         pass "entry routes to snoodles:$skill"
     else
         fail "entry missing route to snoodles:$skill"
     fi
 done
 
-# entry planning flow must be in correct order
-if grep -A5 "Planning Flow" skills/entry/SKILL.md | grep -q "derive-prompt"; then
-    pass "planning flow starts with derive-prompt"
+# entry must enforce derive-prompt first in plan mode (via HARD-GATE or routing rules)
+if grep -q "derive-prompt" session/entry/SKILL.md && grep -q "HARD-GATE" session/entry/SKILL.md; then
+    pass "entry enforces derive-prompt first (HARD-GATE)"
 else
-    fail "planning flow missing derive-prompt as first step"
+    fail "entry missing derive-prompt enforcement"
 fi
 
 # brainstorm must NOT reference derive-intent (snood artifact)
@@ -264,7 +303,7 @@ else
 fi
 
 # Epistemic honesty should NOT be in entry (it's in insights, injected alongside)
-if grep -q "Epistemic" skills/entry/SKILL.md 2>/dev/null; then
+if grep -q "Epistemic" session/entry/SKILL.md 2>/dev/null; then
     fail "Epistemic honesty duplicated in entry (should be in insights only)"
 else
     pass "Epistemic honesty not duplicated in entry"
@@ -288,17 +327,17 @@ else
     fail "hooks/hooks.json missing"
 fi
 
-# Hook must read both entry and insights
-if grep -q "entry/SKILL.md" hooks/session-start; then
-    pass "session-start reads entry skill"
+# Hook must read from session/ directory (not skills/)
+if grep -q "session/entry/SKILL.md" hooks/session-start; then
+    pass "session-start reads entry from session/"
 else
-    fail "session-start doesn't read entry skill"
+    fail "session-start doesn't read entry from session/"
 fi
 
-if grep -q "insights/SKILL.md" hooks/session-start; then
-    pass "session-start reads insights skill"
+if grep -q "session/insights/SKILL.md" hooks/session-start; then
+    pass "session-start reads insights from session/"
 else
-    fail "session-start doesn't read insights skill"
+    fail "session-start doesn't read insights from session/"
 fi
 
 # Hook must produce valid JSON
@@ -347,9 +386,9 @@ check_word_count() {
     fi
 }
 
-# Session-injected skills must be lean
-check_word_count "skills/entry/SKILL.md" "entry (session-injected)" 400
-check_word_count "skills/insights/SKILL.md" "insights (session-injected)" 300
+# Session-injected files must be lean
+check_word_count "session/entry/SKILL.md" "entry (session-injected)" 400
+check_word_count "session/insights/SKILL.md" "insights (session-injected)" 300
 
 # Other skills can be larger but still bounded
 check_word_count "skills/brainstorm/SKILL.md" "brainstorm" 900

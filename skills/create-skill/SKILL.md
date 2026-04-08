@@ -186,7 +186,7 @@ Three responses: (1) "Skill was clear, I ignored it" → stronger foundational p
 
 ## Step 6: Register
 
-Add entry to `skills/entry/SKILL.md` routing table:
+Add entry to `session/entry/SKILL.md` routing table:
 
 ```markdown
 | `snoodles:create-skill` | Creating a new skill or editing an existing skill |

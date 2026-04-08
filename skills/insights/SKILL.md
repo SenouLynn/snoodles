@@ -38,5 +38,5 @@ Behavioral corrections for recurring failure modes. Follow these rules precisely
 ## Verify Edits Immediately
 
 1. **Use available tooling.** LSP, linters, and formatters check code after edits automatically.
-2. **NEVER run build/typecheck/lint commands.** PostToolUse hooks run checks automatically. Trust the hooks.
+2. **NEVER run build/typecheck/lint/test commands.** PostToolUse hooks run checks automatically. Trust the hooks.
 3. **Skill gate is enforced by hook.** A PreToolUse hook blocks Write/Edit on source files when no skill was invoked this turn. This is not bypassable — invoke the correct skill first.

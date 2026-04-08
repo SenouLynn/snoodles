@@ -21,16 +21,17 @@ Dispatch parallel agents to execute a phased plan. Each agent works in an isolat
 
 ```
 For each phase:
+  0. Record pre_phase_sha=$(git rev-parse HEAD) before dispatching
   1. Dispatch all tasks in parallel (one agent per task, isolation: "worktree")
   2. Collect results — all must complete before proceeding
-  3. Apply worktree changes to working branch (uncommitted — never auto-commit)
+  3. Apply each worktree branch: git merge --squash <worktree-branch> (staged, never committed)
   4. Resolve any conflicts
-  5. Run phase verification (project builds, tests pass)
-  6. [If between-phases mode] Dispatch code review on merged phase result
+  5. Confirm hook feedback is clean after applying changes
+  6. [If between-phases mode] Dispatch code review using pre_phase_sha
   7. [If issues found] Fix before starting next phase
 ```
 
-After final phase: run final verification regardless of mode.
+After final phase: verify hook feedback is clean regardless of mode.
 
 ## Dispatching Agents
 
@@ -69,8 +70,7 @@ You are implementing Task N.M: [task name]
 ## Rules
 - Implement exactly what the task specifies. Nothing more.
 - Write tests if the task includes them.
-- Run the task's verification command (test suite) and confirm it passes.
-- Do NOT run typecheck, lint, or build commands (tsc, pyright, go vet, etc.) unless the task explicitly requires it — hooks handle these automatically after every edit.
+- Do NOT run test suites, build commands, typecheck, or lint (tsc, pyright, go vet, pytest, npm test, etc.) — PostToolUse hooks verify automatically after every edit. Trust them.
 - Commit your work with the specified commit message.
 - **Bad work is worse than no work.** If you can't do it right, report BLOCKED — don't produce something wrong.
 - If anything is unclear or unexpected: STOP and report back. Don't guess.
@@ -87,21 +87,21 @@ Fix issues found during self-review before reporting.
 ## Report
 When done, report:
 - Status: DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT
-  - DONE — all requirements met, tests pass
+  - DONE — all requirements met, hooks clean
   - DONE_WITH_CONCERNS — requirements met but [specific concern]
   - BLOCKED — cannot proceed because [specific blocker]
   - NEEDS_CONTEXT — need answer to [specific question]
 - What you implemented
-- Verification result (exact output)
+- Hook feedback (any errors reported)
 - Files changed
 - Self-review findings (if any)
 ```
 
 ## After Each Phase
 
-1. **Apply worktree changes.** Each completed agent returns a worktree path and branch. Apply changes to working branch as uncommitted/staged files — NEVER auto-commit onto the working branch. Use `git diff <worktree-branch> | git apply` or `git cherry-pick --no-commit`.
+1. **Apply worktree changes.** For each completed agent, run `git merge --squash <worktree-branch>`. This stages all changes without committing. NEVER auto-commit onto the working branch.
 2. **Handle conflicts.** If two tasks modified adjacent code, resolve and verify.
-3. **Phase verification.** Run the test suite to verify integration. If failures, fix before proceeding.
+3. **Phase verification.** Confirm hook feedback is clean. If errors, fix before proceeding.
 4. **Code review** (if between-phases mode). Dispatch the code-reviewer agent on the merged diff:
 
 ```
@@ -117,7 +117,7 @@ Agent:
     [Phase description from plan doc]
 
     ## Review scope
-    git diff [pre-phase SHA]..HEAD
+    git diff <pre_phase_sha>..HEAD  (pre_phase_sha recorded before this phase dispatched)
 
     Report: Strengths, Issues (Critical/Important/Minor), Assessment.
     Critical/Important issues must be fixed before next phase.
@@ -129,7 +129,7 @@ Agent:
 
 Regardless of validation mode:
 
-1. Run test suite
+1. Confirm hook feedback is clean
 2. **Spec compliance review** — dispatch a reviewer agent on the complete implementation against the original plan:
 
 ```
@@ -175,8 +175,8 @@ Agent:
 
 - NEVER start on main/master without explicit user consent — create a branch first
 - NEVER dispatch Phase N+1 before Phase N is fully applied and verified
-- NEVER skip phase verification (build + tests must pass)
+- NEVER skip phase verification (hook feedback must be clean)
 - NEVER send an agent the raw plan file — paste the task text
 - NEVER proceed with Critical review issues unresolved
 - **Commit philosophy:** worktree → commit freely; working branch → NEVER auto-commit. All worktree results land as uncommitted/staged changes. User commits when ready.
-- If end-only mode: still run build+tests between phases — just skip code review
+- If end-only mode: still verify hook feedback between phases — just skip code review

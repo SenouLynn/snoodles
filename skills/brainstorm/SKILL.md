@@ -93,9 +93,7 @@ Group tasks into **phases** by dependency order. Tasks within a phase have no de
 1. [Exact action with exact code or change description]
 2. [Next action]
 
-**Verify:** `[exact command]` → expected: [specific output]
-
-**Commit:** `git commit -m "feat: [what this task accomplished]"` *(worktree agents only — never on working branch)*
+**Done when:** [observable outcome — what the code does, what the UI shows, what the API returns. Not a command to run.]
 
 ### Task 1.2: [Specific Action]
 ...
@@ -110,7 +108,7 @@ Group tasks into **phases** by dependency order. Tasks within a phase have no de
 
 - **Exact file paths always.** No "the relevant file" or "the handler."
 - **Complete code in plan.** Not "add validation" — show what validation.
-- **Verification per task.** Every task has a command that proves it worked, run immediately after.
+- **Completion criteria per task.** Every task has an observable outcome — what the code does, what the UI shows, what the API returns. Not a build command.
 - **No vague verbs.** Not "handle", "support", "wire up" — say what happens.
 - **No restating context.** Each task inherits the header. Don't repeat the goal.
 - **Tasks within a phase must be independent.** No task in Phase N may depend on another task in Phase N. If two tasks touch the same file, they belong in different phases.
@@ -120,7 +118,7 @@ Group tasks into **phases** by dependency order. Tasks within a phase have no de
 Before presenting, verify:
 - [ ] Every file reference points to a real path found during exploration
 - [ ] Each task is independently one-shottable with clear completion criteria
-- [ ] Verification commands have expected output, not just "should work"
+- [ ] Each "Done when" describes an observable outcome, not a command to run
 - [ ] No TODOs, placeholders, or "figure out later"
 - [ ] YAGNI — nothing beyond what the intent requires
 

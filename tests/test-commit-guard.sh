@@ -70,6 +70,18 @@ echo "$output" | grep -q "COMMIT GUARD" \
 echo '{"tool_input":{"command":""}}' | bash "$HOOK" > /dev/null 2>&1
 [ $? -eq 0 ] && pass "handles empty command gracefully" || fail "should handle empty command gracefully"
 
+# 9. git -C /path commit → blocked (bypass via -C flag)
+echo '{"tool_input":{"command":"git -C /some/repo commit -m '\''test'\''"}}' | bash "$HOOK" > /dev/null 2>&1
+[ $? -eq 1 ] && pass "blocks git -C /path commit" || fail "should block git -C /path commit"
+
+# 10. git --git-dir=/path/.git commit → blocked
+echo '{"tool_input":{"command":"git --git-dir=/some/repo/.git commit -m '\''test'\''"}}' | bash "$HOOK" > /dev/null 2>&1
+[ $? -eq 1 ] && pass "blocks git --git-dir=... commit" || fail "should block git --git-dir=... commit"
+
+# 11. git -c user.email=x commit → blocked (config flag before subcommand)
+echo '{"tool_input":{"command":"git -c user.email=x@y.com commit -m '\''test'\''"}}' | bash "$HOOK" > /dev/null 2>&1
+[ $? -eq 1 ] && pass "blocks git -c config commit" || fail "should block git -c config commit"
+
 echo ""
 echo "Passed: $PASS  Failed: $FAIL"
 [ $FAIL -eq 0 ] && exit 0 || exit 1

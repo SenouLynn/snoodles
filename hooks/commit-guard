@@ -2,16 +2,60 @@
 # PreToolUse hook: block git commit outside linked worktrees
 # Commits are only allowed inside worktree agents (snoodles:execute).
 
-command=$(cat | jq -r '.tool_input.command // empty')
+input=$(cat)
+command=$(printf '%s' "$input" | python3 -c "
+import sys, json
+try:
+    d = json.load(sys.stdin)
+    print(d.get('tool_input', {}).get('command', ''))
+except:
+    print('')
+" 2>/dev/null)
 
-# Only act on commands containing git commit
-echo "$command" | grep -qE 'git\s+commit' || exit 0
+# Detect git commit as a subcommand, handling flags before the subcommand:
+#   git commit, git -C /path commit, git -c key=val commit, git --git-dir=x commit
+_is_git_commit() {
+    python3 - "$1" << 'PYEOF' 2>/dev/null
+import sys, re, shlex
+
+cmd = sys.argv[1] if len(sys.argv) > 1 else ''
+
+def check_tokens(tokens):
+    i = 0
+    while i < len(tokens):
+        if re.search(r'(^|/)git$', tokens[i]):
+            j = i + 1
+            while j < len(tokens) and tokens[j].startswith('-'):
+                flag = tokens[j]
+                j += 1
+                # Skip value argument for flags that take one
+                if flag in ('-C', '-c', '--work-tree', '--namespace') and j < len(tokens):
+                    j += 1
+            if j < len(tokens) and tokens[j] == 'commit':
+                sys.exit(0)  # found
+        i += 1
+    sys.exit(1)  # not found
+
+try:
+    check_tokens(shlex.split(cmd))
+except SystemExit:
+    raise
+except Exception:
+    pass
+
+# Fallback for unparseable input (e.g. bash -c '...git commit...')
+sys.exit(0 if re.search(r'\bgit\s+commit\b', cmd) else 1)
+PYEOF
+}
+
+# Allow if no git commit subcommand detected
+_is_git_commit "$command" || exit 0
 
 # Passthrough if not in a git repo
 git_dir=$(git rev-parse --absolute-git-dir 2>/dev/null)
 [ -z "$git_dir" ] && exit 0
 
-# Allow only inside a linked worktree (git stores worktrees at .git/worktrees/<name>)
+# Allow only inside a linked worktree (git stores these at .git/worktrees/<name>)
 case "$git_dir" in
   */.git/worktrees/*)
     exit 0

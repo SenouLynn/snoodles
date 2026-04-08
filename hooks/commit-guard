@@ -1,21 +1,22 @@
 #!/usr/bin/env bash
-# PreToolUse hook: block git commit on protected branches
-# Prevents agents from committing directly to main/master.
+# PreToolUse hook: block git commit outside linked worktrees
+# Commits are only allowed inside worktree agents (snoodles:execute).
 
 command=$(cat | jq -r '.tool_input.command // empty')
 
 # Only act on commands containing git commit
 echo "$command" | grep -qE 'git\s+commit' || exit 0
 
-# Check current branch — allow if not in a git repo or detached HEAD
-branch=$(git branch --show-current 2>/dev/null)
-[ -z "$branch" ] && exit 0
+# Passthrough if not in a git repo
+git_dir=$(git rev-parse --absolute-git-dir 2>/dev/null)
+[ -z "$git_dir" ] && exit 0
 
-case "$branch" in
-  main|master)
-    printf '%s' "{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"additionalContext\":\"COMMIT GUARD: git commit blocked on '${branch}'.\\n\\nCommits are only allowed inside worktree agents (snoodles:execute).\\nOn the working branch, stop after edits — the user owns the git history.\"}}"
-    exit 1
+# Allow only inside a linked worktree (git stores worktrees at .git/worktrees/<name>)
+case "$git_dir" in
+  */.git/worktrees/*)
+    exit 0
     ;;
 esac
 
-exit 0
+printf '%s' '{"hookSpecificOutput":{"hookEventName":"PreToolUse","additionalContext":"COMMIT GUARD: git commit blocked outside a worktree.\n\nCommits are only allowed inside worktree agents (snoodles:execute).\nOn the working branch, stop after edits — the user owns the git history."}}'
+exit 1

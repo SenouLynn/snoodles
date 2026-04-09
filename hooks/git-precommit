@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Git pre-commit hook: block commits outside linked worktrees.
+# Catches: git commit (pre-commit), git merge (pre-merge-commit)
+# Known gap: git cherry-pick bypasses pre-commit hooks
+# Install as BOTH hooks:
+#   cp hooks/git-precommit .git/hooks/pre-commit
+#   cp hooks/git-precommit .git/hooks/pre-merge-commit
+
+case "$(git rev-parse --absolute-git-dir 2>/dev/null)" in
+  */.git/worktrees/*) exit 0 ;;
+esac
+
+echo "no commits onto working branch: rebase or squash-merge instead"
+exit 1

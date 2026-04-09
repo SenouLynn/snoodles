@@ -178,5 +178,5 @@ Agent:
 - NEVER skip phase verification (hook feedback must be clean)
 - NEVER send an agent the raw plan file — paste the task text
 - NEVER proceed with Critical review issues unresolved
-- **Commit philosophy:** worktree → commit freely; working branch → NEVER auto-commit. All worktree results land as uncommitted/staged changes. User commits when ready.
+- **Commit philosophy:** worktree → commit freely; working branch → NEVER auto-commit. All worktree results land as uncommitted/staged changes. User commits when ready. Git `pre-commit`/`pre-merge-commit` hooks enforce this.
 - If end-only mode: still verify hook feedback between phases — just skip code review
